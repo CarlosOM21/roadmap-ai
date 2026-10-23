@@ -1,0 +1,55 @@
+# Entornos y herramientas
+.venv/
+venv/
+env/
+.python-version
+.uv/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.installed.cfg
+
+# Configuración local y secretos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Base de datos y datos locales
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+data/*
+!data/.gitkeep
+
+# Salidas generadas
+exports/
+roadmap-*.md
+roadmap-*.json
+*.log
+
+# Editores y sistemas operativos
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
