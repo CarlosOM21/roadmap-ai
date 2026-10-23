@@ -59,8 +59,8 @@ class PipelineService:
     async def generate(
         self,
         topic: str,
-        depth: int = 6,
-        max_resources: int = 80,
+        depth: int = 8,
+        max_resources: int = 120,
         source_names: list[str] | None = None,
         offline: bool = False,
     ) -> Roadmap:
@@ -79,11 +79,16 @@ class PipelineService:
         all_queries = []
         for level in planned.levels:
             all_queries.extend(level.queries)
-        # Añadir query general del tema
+        # Añadir queries genéricas y diversas sin sesgo a dominio
         all_queries.insert(0, topic)
-        all_queries.append(f"{topic} curso completo")
-        all_queries.append(f"{topic} libro introduccion")
+        all_queries.append(f"{topic} curso")
+        all_queries.append(f"{topic} libro")
+        all_queries.append(f"{topic} tutorial")
+        all_queries.append(f"{topic} ejercicios")
+        all_queries.append(f"{topic} proyectos")
         all_queries.append(f"{topic} github")
+        all_queries.append(f"{topic} papers")
+        all_queries.append(f"{topic} referencias")
         # Eliminar duplicados manteniendo orden
         unique_queries = []
         seen_q = set()

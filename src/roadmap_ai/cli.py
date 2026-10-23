@@ -189,10 +189,10 @@ def main() -> None:
 
 @app.command()
 def generate(
-    topic: str = typer.Argument(..., help="Tema académico, por ejemplo 'inteligencia artificial'."),
-    depth: int = typer.Option(6, "--depth", min=4, max=8, help="Número de niveles (4-8)."),
+    topic: str = typer.Argument(..., help="Tema académico, por ejemplo 'diseño mecatrónico'."),
+    depth: int = typer.Option(8, "--depth", min=4, max=10, help="Número de niveles (4-10)."),
     max_resources: int = typer.Option(
-        80,
+        120,
         "--max-resources",
         min=1,
         help="Máximo de recursos incluidos en el roadmap.",

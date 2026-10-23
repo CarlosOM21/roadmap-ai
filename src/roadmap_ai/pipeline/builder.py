@@ -37,8 +37,8 @@ class DefaultRoadmapBuilder:
         self,
         planned: PlannedRoadmap,
         resources: list[Resource],
-        max_resources_per_level: int = 12,
-        total_max_resources: int = 80,
+        max_resources_per_level: int = 16,
+        total_max_resources: int = 120,
     ) -> Roadmap:
         """Construye roadmap válido asignando recursos a cada nivel."""
         if not resources:
@@ -52,13 +52,13 @@ class DefaultRoadmapBuilder:
 
         # Asignar recursos a cada nivel
         roadmap_levels = []
-        resources_per_level = max(8, max_resources_per_level)
+        resources_per_level = max(12, max_resources_per_level)
 
         for planned_level in planned.levels:
             # Rankear recursos específicamente para este nivel
             level_resources = self.ranker.rank(ranked_resources, planned.topic, planned_level.title)
 
-            # Tomar top recursos para este nivel (evitando duplicados excesivos)
+            # Tomar top recursos para este nivel
             assigned = []
             seen_ids = set()
             for res in level_resources:
