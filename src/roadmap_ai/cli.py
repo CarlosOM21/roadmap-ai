@@ -23,6 +23,7 @@ from roadmap_ai.exporters import (
     export_markdown,
 )
 from roadmap_ai.models import Roadmap
+from roadmap_ai.pipeline.service import PipelineService
 from roadmap_ai.sample_data import build_sample_roadmap
 from roadmap_ai.storage import (
     AmbiguousRoadmapIdError,
@@ -59,6 +60,18 @@ def _configure_logging(settings: Settings) -> None:
     handler.setFormatter(logging.Formatter("%(message)s"))
     handler._roadmap_ai_handler = True
     logger.addHandler(handler)
+
+
+@contextmanager
+def _database_context(settings: Settings | None = None) -> Iterator[Database]:
+    settings = settings or get_settings()
+    _configure_logging(settings)
+    database = Database(settings.database_url)
+    database.create_all()
+    try:
+        yield database
+    finally:
+        database.dispose()
 
 
 @contextmanager
@@ -193,23 +206,60 @@ def generate(
     no_llm: bool = typer.Option(
         False,
         "--no-llm",
-        help="Genera sin LLM. La Fase 1 siempre funciona sin LLM.",
+        help="Genera sin LLM (usa pipeline heurístico).",
+    ),
+    offline: bool = typer.Option(
+        False,
+        "--offline",
+        help="Usa solo datos de demostración sin consultar APIs externas.",
+    ),
+    sources: str | None = typer.Option(
+        None,
+        "--sources",
+        help="Fuentes separadas por coma (openalex,semantic_scholar,arxiv,open_library,youtube).",
     ),
 ) -> None:
-    """Genera un roadmap de demostración y lo guarda en SQLite."""
+    """Genera un roadmap usando el pipeline real o datos de demostración."""
     if not topic.strip():
         _abort("El tema no puede estar vacío", exit_code=2)
 
     settings = get_settings()
     _configure_logging(settings)
+
+    source_list = None
+    if sources:
+        source_list = [s.strip() for s in sources.split(",") if s.strip()]
+
     try:
-        roadmap = build_sample_roadmap(
-            topic,
-            depth=depth,
-            max_resources=max_resources,
-        )
-        with _repository() as repository:
-            repository.save(roadmap)
+        import asyncio
+
+        with _database_context(settings) as database:
+            service = PipelineService(database, settings, use_llm=not no_llm)
+            if offline:
+                roadmap = build_sample_roadmap(topic, depth=depth, max_resources=max_resources)
+                with _repository() as repository:
+                    repository.save(roadmap)
+            else:
+                try:
+                    roadmap = asyncio.run(
+                        service.generate(
+                            topic,
+                            depth=depth,
+                            max_resources=max_resources,
+                            source_names=source_list,
+                            offline=False,
+                        )
+                    )
+                    with _repository() as repository:
+                        repository.save(roadmap)
+                except Exception as exc:
+                    console.print(
+                        "[yellow]Aviso:[/yellow] Falló pipeline real "
+                        f"({exc}), usando datos de demostración."
+                    )
+                    roadmap = build_sample_roadmap(topic, depth=depth, max_resources=max_resources)
+                    with _repository() as repository:
+                        repository.save(roadmap)
     except ValueError as exc:
         _abort(str(exc), exit_code=2)
     except RepositoryError as exc:
@@ -224,15 +274,16 @@ def generate(
             f"[dim]ID:[/dim] {roadmap.id}\n"
             f"[dim]Niveles:[/dim] {len(roadmap.levels)}\n"
             f"[dim]Recursos:[/dim] {len(roadmap.resources)}\n"
-            f"[dim]Fuentes de ejemplo:[/dim] {escape(_sources_text(roadmap))}",
-            title="RoadmapAI - Fase 1",
+            f"[dim]Fuentes:[/dim] {escape(_sources_text(roadmap))}",
+            title="RoadmapAI - Fase 3",
             border_style="green",
         )
     )
-    console.print(
-        "[yellow]Aviso:[/yellow] los recursos actuales son datos de demostración. "
-        "Las APIs externas y el LLM se incorporan en las siguientes fases."
-    )
+    if offline or not source_list:
+        console.print(
+            "[yellow]Aviso:[/yellow] Usa --offline para datos demo o las APIs externas "
+            "se consultan según configuración. Los recursos deben tener URLs verificables."
+        )
 
     if output is not None:
         try:
