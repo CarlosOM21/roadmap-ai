@@ -49,43 +49,43 @@ class HeuristicRanker:
 
             # Coincidencia con tema (peso alto)
             if topic_lower in title_lower:
-                score += 0.3
+                score += 0.25
             elif any(word in title_lower for word in topic_lower.split() if len(word) > 3):
-                score += 0.15
+                score += 0.12
 
             if topic_lower in summary_lower:
-                score += 0.1
+                score += 0.08
             elif any(word in summary_lower for word in topic_lower.split() if len(word) > 3):
-                score += 0.05
+                score += 0.04
 
             # Coincidencia con nivel (peso medio)
             if level_lower in title_lower:
-                score += 0.2
+                score += 0.15
             elif any(word in title_lower for word in level_lower.split() if len(word) > 3):
-                score += 0.1
+                score += 0.08
 
             if level_lower in summary_lower:
-                score += 0.05
+                score += 0.04
 
             # Preferencia por open access
             if resource.open_access:
-                score += 0.15
+                score += 0.12
 
             # Preferencia por recencia (papers/libros recientes)
             if resource.year:
                 if resource.year >= 2020:
-                    score += 0.1
+                    score += 0.08
                 elif resource.year >= 2015:
                     score += 0.05
                 elif resource.year >= 2010:
-                    score += 0.02
+                    score += 0.03
 
             # Preferencia por citas (si disponible)
             if resource.citation_count and resource.citation_count > 0:
                 # Logarítmico para evitar sesgo excesivo
                 import math
 
-                citation_score = min(0.1, math.log10(resource.citation_count + 1) * 0.05)
+                citation_score = min(0.08, math.log10(resource.citation_count + 1) * 0.04)
                 score += citation_score
 
             # Preferencia por tipo de recurso según contexto
@@ -100,7 +100,7 @@ class HeuristicRanker:
             ):
                 score += 0.05
             elif resource.type == ResourceType.DOCUMENTATION:
-                score += 0.03
+                score += 0.02
 
             # Bonus por tener autores y metadata completa
             if resource.authors:

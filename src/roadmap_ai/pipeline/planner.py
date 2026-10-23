@@ -48,141 +48,229 @@ class HeuristicPlanner:
     """Planificador heurístico determinista sin LLM."""
 
     async def plan(self, topic: str, depth: int) -> PlannedRoadmap:
-        """Genera plan curricular basado en reglas heurísticas."""
-        depth = max(4, min(6, depth))
+        """Genera plan curricular amplio y diverso."""
+        depth = max(6, min(8, depth))  # Más robusto por defecto
         topic_clean = topic.strip()
 
-        # Plantillas heurísticas por tipo de tema
         levels_data = []
-
-        if depth >= 4:
-            levels_data.append(
-                PlannedLevel(
-                    number=1,
-                    title=f"Fundamentos de {topic_clean}",
-                    objective=f"Comprender los conceptos básicos y terminología de {topic_clean}",
-                    prerequisites=[],
-                    concepts=["Conceptos básicos", "Terminología", "Historia y contexto"],
-                    projects=[f"Mapa conceptual de {topic_clean}"],
-                    queries=[
-                        f"introduccion {topic_clean}",
-                        f"fundamentos {topic_clean} libro",
-                        f"{topic_clean} conceptos basicos",
-                    ],
-                )
-            )
-
-        if depth >= 5:
-            levels_data.append(
-                PlannedLevel(
-                    number=2,
-                    title=f"Teoría y principios de {topic_clean}",
-                    objective="Dominar los principios teóricos fundamentales",
-                    prerequisites=[f"Fundamentos de {topic_clean}"],
-                    concepts=["Principios", "Leyes", "Modelos teóricos"],
-                    projects=[f"Resolución de ejercicios teóricos de {topic_clean}"],
-                    queries=[
-                        f"teoria {topic_clean}",
-                        f"principios {topic_clean}",
-                        f"{topic_clean} fundamentos teoricos",
-                    ],
-                )
-            )
-        else:
-            levels_data.append(
-                PlannedLevel(
-                    number=2,
-                    title=f"Teoría y fundamentos avanzados de {topic_clean}",
-                    objective="Profundizar en los aspectos teóricos",
-                    prerequisites=[f"Fundamentos de {topic_clean}"],
-                    concepts=["Teoría", "Análisis", "Modelado"],
-                    projects=[f"Análisis teórico aplicado a {topic_clean}"],
-                    queries=[
-                        f"teoria {topic_clean} avanzado",
-                        f"{topic_clean} analisis",
-                    ],
-                )
-            )
-
-        if depth >= 5:
-            levels_data.append(
-                PlannedLevel(
-                    number=3,
-                    title=f"Herramientas y metodologías de {topic_clean}",
-                    objective="Aprender las herramientas y métodos prácticos",
-                    prerequisites=[f"Teoría y principios de {topic_clean}"],
-                    concepts=["Herramientas", "Metodologías", "Técnicas"],
-                    projects=[f"Aplicación práctica con herramientas de {topic_clean}"],
-                    queries=[
-                        f"{topic_clean} herramientas",
-                        f"{topic_clean} metodologia practica",
-                        f"tutorial {topic_clean}",
-                    ],
-                )
-            )
-        else:
-            levels_data.append(
-                PlannedLevel(
-                    number=3,
-                    title=f"Aplicaciones prácticas de {topic_clean}",
-                    objective="Aplicar conocimientos a casos prácticos",
-                    prerequisites=[f"Teoría y fundamentos avanzados de {topic_clean}"],
-                    concepts=["Aplicaciones", "Casos de uso", "Implementación"],
-                    projects=[f"Proyecto práctico de {topic_clean}"],
-                    queries=[
-                        f"{topic_clean} aplicaciones practicas",
-                        f"{topic_clean} casos de uso",
-                    ],
-                )
-            )
 
         levels_data.append(
             PlannedLevel(
-                number=4,
-                title=f"Proyectos y casos reales en {topic_clean}",
-                objective="Resolver problemas reales mediante proyectos integradores",
-                prerequisites=[f"Herramientas y metodologías de {topic_clean}"]
-                if depth >= 5
-                else [f"Aplicaciones prácticas de {topic_clean}"],
-                concepts=["Proyectos integradores", "Resolución de problemas", "Buenas prácticas"],
-                projects=[f"Proyecto integrador completo de {topic_clean}"],
+                number=1,
+                title=f"Fundamentos, historia y panorama de {topic_clean}",
+                objective=f"Comprender conceptos y terminología de {topic_clean}",
+                prerequisites=[],
+                concepts=[
+                    "Conceptos básicos",
+                    "Terminología",
+                    "Historia",
+                    "Aplicaciones",
+                    "Áreas afines",
+                ],
+                projects=[f"Mapa conceptual completo de {topic_clean}"],
                 queries=[
-                    f"{topic_clean} proyecto practico",
-                    f"{topic_clean} ejemplos reales",
-                    f"ejercicios {topic_clean}",
+                    f"introduccion {topic_clean}",
+                    f"fundamentos {topic_clean} libro",
+                    f"{topic_clean} conceptos basicos",
+                    f"{topic_clean} curso introductorio",
+                    f"historia {topic_clean}",
                 ],
             )
         )
 
-        if depth >= 5:
+        levels_data.append(
+            PlannedLevel(
+                number=2,
+                title=f"Matemáticas, lógica y bases teóricas para {topic_clean}",
+                objective="Dominar las bases matemáticas y lógicas necesarias",
+                prerequisites=[f"Fundamentos, historia y panorama de {topic_clean}"],
+                concepts=["Matemáticas", "Lógica", "Probabilidad", "Álgebra", "Estadística"],
+                projects=[f"Ejercicios matemáticos aplicados a {topic_clean}"],
+                queries=[
+                    f"{topic_clean} matematicas",
+                    f"probabilidad {topic_clean}",
+                    f"logica {topic_clean}",
+                    f"estadistica {topic_clean}",
+                    f"{topic_clean} bases teoricas libro",
+                ],
+            )
+        )
+
+        levels_data.append(
+            PlannedLevel(
+                number=3,
+                title=f"Algoritmos, búsqueda, heurísticas y razonamiento en {topic_clean}",
+                objective="Aprender algoritmos, búsqueda y heurísticas",
+                prerequisites=[f"Matemáticas, lógica y bases teóricas para {topic_clean}"],
+                concepts=[
+                    "Algoritmos de búsqueda",
+                    "Búsqueda heurística",
+                    "Juegos",
+                    "Razonamiento",
+                    "Satisfacción de restricciones",
+                ],
+                projects=[f"Implementar algoritmos para {topic_clean}"],
+                queries=[
+                    f"algoritmos de busqueda {topic_clean}",
+                    f"busqueda heuristica {topic_clean}",
+                    f"heuristicas {topic_clean}",
+                    f"{topic_clean} algoritmos libro",
+                    f"{topic_clean} curso algoritmos",
+                ],
+            )
+        )
+
+        levels_data.append(
+            PlannedLevel(
+                number=4,
+                title=f"Aprendizaje automático, clasificadores y modelos en {topic_clean}",
+                objective="Dominar aprendizaje supervisado/no supervisado y clasificadores",
+                prerequisites=[
+                    f"Algoritmos, búsqueda, heurísticas y razonamiento en {topic_clean}"
+                ],
+                concepts=[
+                    "Aprendizaje supervisado",
+                    "Clasificadores",
+                    "Validación",
+                    "Features",
+                    "Overfitting",
+                ],
+                projects=[f"Entrenar clasificadores para {topic_clean}"],
+                queries=[
+                    f"machine learning {topic_clean}",
+                    f"clasificadores {topic_clean}",
+                    f"aprendizaje supervisado {topic_clean}",
+                    f"deep learning {topic_clean}",
+                    f"{topic_clean} sklearn tutorial",
+                    f"{topic_clean} curso machine learning",
+                ],
+            )
+        )
+
+        if depth >= 6:
             levels_data.append(
                 PlannedLevel(
                     number=5,
-                    title=f"Temas avanzados y especialización en {topic_clean}",
-                    objective="Explorar temas avanzados y áreas de especialización",
-                    prerequisites=[f"Proyectos y casos reales en {topic_clean}"],
-                    concepts=["Temas avanzados", "Investigación", "Tendencias"],
-                    projects=[f"Investigación o proyecto de especialización en {topic_clean}"],
+                    title=f"Razonamiento bajo incertidumbre y RL en {topic_clean}",
+                    objective="Aprender incertidumbre, MDPs, planificación y RL",
+                    prerequisites=[
+                        f"Aprendizaje automático, clasificadores y modelos en {topic_clean}"
+                    ],
+                    concepts=[
+                        "Probabilidad bayesiana",
+                        "MDP",
+                        "POMDP",
+                        "Aprendizaje por refuerzo",
+                        "Q-Learning",
+                        "Políticas",
+                    ],
+                    projects=[f"Resolver problemas con MDP o RL para {topic_clean}"],
                     queries=[
-                        f"{topic_clean} avanzado",
-                        f"{topic_clean} investigacion",
-                        f"{topic_clean} temas avanzados",
+                        f"MDP {topic_clean}",
+                        f"markov decision process {topic_clean}",
+                        f"reinforcement learning {topic_clean}",
+                        f"aprendizaje por refuerzo {topic_clean}",
+                        f"rl tutorial {topic_clean}",
+                        "pytorch reinforcement learning",
                     ],
                 )
             )
 
-        if depth == 6:
+        if depth >= 7:
             levels_data.append(
                 PlannedLevel(
                     number=6,
-                    title=f"Maestría y dominio experto de {topic_clean}",
-                    objective="Desarrollar capacidad crítica y visión experta",
-                    prerequisites=[f"Temas avanzados y especialización en {topic_clean}"],
-                    concepts=["Síntesis", "Crítica", "Innovación"],
-                    projects=[f"Propuesta innovadora o contribución original en {topic_clean}"],
+                    title=f"Sistemas basados en conocimiento y RAG en {topic_clean}",
+                    objective="Desarrollar agentes, PLN, conocimiento y RAG",
+                    prerequisites=[f"Razonamiento bajo incertidumbre y RL en {topic_clean}"],
+                    concepts=[
+                        "Agentes",
+                        "Ontologías",
+                        "PLN",
+                        "Embeddings",
+                        "RAG",
+                        "Sistemas conversacionales",
+                    ],
+                    projects=[f"Construir un agente o RAG aplicado a {topic_clean}"],
                     queries=[
+                        f"agentes inteligentes {topic_clean}",
+                        f"RAG {topic_clean}",
+                        f"retrieval augmented generation {topic_clean}",
+                        f"procesamiento lenguaje natural {topic_clean}",
+                        f"nlp {topic_clean} tutorial",
+                        "langchain rag tutorial",
+                    ],
+                )
+            )
+
+        if depth >= 8:
+            levels_data.append(
+                PlannedLevel(
+                    number=7,
+                    title=f"Ética, explicabilidad y despliegue en {topic_clean}",
+                    objective="Abordar ética, sesgo, explicabilidad y MLOps",
+                    prerequisites=[
+                        f"Sistemas basados en conocimiento, agentes, PLN y RAG en {topic_clean}"
+                    ],
+                    concepts=[
+                        "Ética IA",
+                        "Explicabilidad",
+                        "Sesgo",
+                        "MLOps",
+                        "Evaluación",
+                        "Seguridad",
+                    ],
+                    projects=[f"Proyecto integral con despliegue y ética en {topic_clean}"],
+                    queries=[
+                        "etica inteligencia artificial",
+                        f"explainable ai {topic_clean}",
+                        f"mlops {topic_clean}",
+                        f"{topic_clean} proyecto avanzado",
+                        f"{topic_clean} papers estado del arte",
+                    ],
+                )
+            )
+            levels_data.append(
+                PlannedLevel(
+                    number=8,
+                    title=f"Investigación, estado del arte y especialización en {topic_clean}",
+                    objective="Leer estado del arte, reproducir papers y especializarse",
+                    prerequisites=[f"Ética, explicabilidad y despliegue en {topic_clean}"],
+                    concepts=[
+                        "Revisión bibliográfica",
+                        "Reproducibilidad",
+                        "Investigación",
+                        "Tendencias",
+                        "Contribución",
+                    ],
+                    projects=[
+                        f"Revisar estado del arte y prototipar contribución en {topic_clean}"
+                    ],
+                    queries=[
+                        f"{topic_clean} survey paper",
                         f"{topic_clean} estado del arte",
-                        f"{topic_clean} investigacion avanzada",
+                        f"{topic_clean} review",
+                        f"{topic_clean} neurips tutorial",
+                        f"{topic_clean} research papers",
+                    ],
+                )
+            )
+        elif depth == 7:
+            levels_data.append(
+                PlannedLevel(
+                    number=7,
+                    title=f"Ética, despliegue, estado del arte y especialización en {topic_clean}",
+                    objective="Integrar todo con ética, despliegue y revisión bibliográfica",
+                    prerequisites=[
+                        f"Sistemas basados en conocimiento, agentes, PLN y RAG en {topic_clean}"
+                    ],
+                    concepts=["Ética", "Despliegue", "Estado del arte", "Especialización"],
+                    projects=[f"Proyecto final integrador en {topic_clean}"],
+                    queries=[
+                        "etica inteligencia artificial",
+                        f"{topic_clean} estado del arte",
+                        f"{topic_clean} proyecto integrador",
+                        f"{topic_clean} papers avanzados",
                     ],
                 )
             )

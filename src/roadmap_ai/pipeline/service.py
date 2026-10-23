@@ -59,8 +59,8 @@ class PipelineService:
     async def generate(
         self,
         topic: str,
-        depth: int = 5,
-        max_resources: int = 30,
+        depth: int = 6,
+        max_resources: int = 80,
         source_names: list[str] | None = None,
         offline: bool = False,
     ) -> Roadmap:
@@ -81,12 +81,15 @@ class PipelineService:
             all_queries.extend(level.queries)
         # Añadir query general del tema
         all_queries.insert(0, topic)
+        all_queries.append(f"{topic} curso completo")
+        all_queries.append(f"{topic} libro introduccion")
+        all_queries.append(f"{topic} github")
         # Eliminar duplicados manteniendo orden
         unique_queries = []
         seen_q = set()
         for q in all_queries:
-            q_lower = q.lower()
-            if q_lower not in seen_q:
+            q_lower = q.lower().strip()
+            if q_lower not in seen_q and q_lower:
                 unique_queries.append(q)
                 seen_q.add(q_lower)
 
@@ -94,7 +97,7 @@ class PipelineService:
         logger.info("Recuperando recursos con %d queries", len(unique_queries))
         sources = self._get_sources(source_names)
         source_results = await self.retriever.retrieve(
-            unique_queries, sources, limit=max(5, max_resources // len(sources) + 5)
+            unique_queries, sources, limit=max(15, max_resources // len(sources) + 15)
         )
 
         # Recopilar todos los recursos
@@ -111,7 +114,7 @@ class PipelineService:
 
         # 4. Construir roadmap
         logger.info("Construyendo roadmap con %d recursos", len(all_resources))
-        resources_per_level = max(2, max_resources // len(planned.levels))
+        resources_per_level = max(8, max_resources // len(planned.levels))
         roadmap = await self.builder.build(
             planned,
             all_resources,

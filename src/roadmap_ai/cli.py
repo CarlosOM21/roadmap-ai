@@ -189,10 +189,10 @@ def main() -> None:
 
 @app.command()
 def generate(
-    topic: str = typer.Argument(..., help="Tema académico, por ejemplo 'sistemas de control'."),
-    depth: int = typer.Option(5, "--depth", min=4, max=6, help="Número de niveles (4-6)."),
+    topic: str = typer.Argument(..., help="Tema académico, por ejemplo 'inteligencia artificial'."),
+    depth: int = typer.Option(6, "--depth", min=4, max=8, help="Número de niveles (4-8)."),
     max_resources: int = typer.Option(
-        30,
+        80,
         "--max-resources",
         min=1,
         help="Máximo de recursos incluidos en el roadmap.",
@@ -444,6 +444,60 @@ def progress(
     action = "desmarcado" if uncomplete else "marcado como completado"
     console.print(f"[green]Nivel {level_number} {action}.[/green]")
     console.print(_render_progress(roadmap, completed_levels))
+
+
+@app.command("remove")
+@app.command("delete")
+def remove(
+    roadmap_id: str = typer.Argument(..., help="ID completo o prefijo único del roadmap."),
+    force: bool = typer.Option(False, "--force", "-f", help="No pedir confirmación."),
+) -> None:
+    """Elimina un roadmap y su progreso."""
+    with _repository() as repository:
+        try:
+            resolved_id = repository.resolve_id(roadmap_id)
+            roadmap = repository.get(resolved_id)
+            if roadmap is None:
+                raise RoadmapNotFoundError(f"No existe un roadmap con id '{roadmap_id}'")
+        except AmbiguousRoadmapIdError as exc:
+            _abort(str(exc), exit_code=2)
+        except RoadmapNotFoundError as exc:
+            _abort(str(exc))
+
+        if not force:
+            confirm = typer.confirm(f"¿Eliminar el roadmap '{roadmap.topic}' ({resolved_id[:8]})?")
+            if not confirm:
+                console.print("[yellow]Eliminación cancelada.[/yellow]")
+                return
+
+        try:
+            # Eliminar con integridad referencial
+            from sqlalchemy import delete
+
+            from roadmap_ai.storage.database import (
+                RoadmapLevelRecord,
+                RoadmapRecord,
+                RoadmapResourceRecord,
+                UserProgressRecord,
+            )
+
+            with repository.database.session() as session:
+                session.exec(
+                    delete(RoadmapResourceRecord).where(
+                        RoadmapResourceRecord.roadmap_id == resolved_id
+                    )
+                )
+                session.exec(
+                    delete(RoadmapLevelRecord).where(RoadmapLevelRecord.roadmap_id == resolved_id)
+                )
+                session.exec(
+                    delete(UserProgressRecord).where(UserProgressRecord.roadmap_id == resolved_id)
+                )
+                session.exec(delete(RoadmapRecord).where(RoadmapRecord.id == resolved_id))
+        except Exception as exc:
+            _abort(f"No se pudo eliminar el roadmap: {exc}")
+
+    console.print(f"[green]Roadmap {resolved_id[:8]} eliminado correctamente.[/green]")
 
 
 @app.command()
