@@ -42,8 +42,8 @@ class SemanticScholarSource(BaseSource):
 
     name = "semantic_scholar"
     display_name = "Semantic Scholar"
-    min_interval = 1.0
-    max_results = 100
+    min_interval = 1.5
+    max_results = 50
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

@@ -53,3 +53,6 @@ roadmap-*.json
 *.swo
 .DS_Store
 Thumbs.db
+
+# Project documentation (local only, never commit)
+ProjectFlux.md

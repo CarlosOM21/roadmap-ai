@@ -184,7 +184,7 @@ def build_sample_roadmap(
 
     Args:
         topic: Tema académico indicado por el usuario.
-        depth: Número de niveles, entre 4 y 6.
+        depth: Número de niveles, entre 4 y 10.
         max_resources: Límite total de recursos incluidos.
         roadmap_id: Identificador a conservar al actualizar un roadmap.
         created_at: Fecha original a conservar al actualizar.
@@ -192,8 +192,8 @@ def build_sample_roadmap(
     normalized_topic = topic.strip()
     if not normalized_topic:
         raise ValueError("El tema no puede estar vacío")
-    if not 4 <= depth <= 6:
-        raise ValueError("La profundidad debe estar entre 4 y 6 niveles")
+    if not 4 <= depth <= 10:
+        raise ValueError("La profundidad debe estar entre 4 y 10 niveles")
     if max_resources < 1:
         raise ValueError("Debe incluirse al menos un recurso")
 

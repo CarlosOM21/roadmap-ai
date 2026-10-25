@@ -14,6 +14,7 @@ from roadmap_ai.sources.open_library import OpenLibrarySource
 from roadmap_ai.sources.openalex import OpenAlexSource
 from roadmap_ai.sources.semantic_scholar import SemanticScholarSource
 from roadmap_ai.sources.youtube import YouTubeSource
+from roadmap_ai.sources.github import GitHubSource
 
 __all__ = [
     "ArxivSource",
@@ -30,4 +31,5 @@ __all__ = [
     "SourceParseError",
     "SourceUnavailableError",
     "YouTubeSource",
+    "GitHubSource",
 ]

@@ -45,8 +45,8 @@ class OpenAlexSource(BaseSource):
 
     name = "openalex"
     display_name = "OpenAlex"
-    min_interval = 0.1
-    max_results = 200
+    min_interval = 0.5
+    max_results = 50
 
     async def _search(self, query: str, limit: int) -> list[Resource]:
         params: dict[str, Any] = {

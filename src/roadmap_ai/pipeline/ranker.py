@@ -49,58 +49,120 @@ class HeuristicRanker:
 
             # Coincidencia con tema (peso alto)
             if topic_lower in title_lower:
-                score += 0.3
+                score += 0.25
             elif any(word in title_lower for word in topic_lower.split() if len(word) > 3):
-                score += 0.15
+                score += 0.12
 
             if topic_lower in summary_lower:
-                score += 0.1
+                score += 0.08
             elif any(word in summary_lower for word in topic_lower.split() if len(word) > 3):
-                score += 0.05
+                score += 0.04
 
             # Coincidencia con nivel (peso medio)
             if level_lower in title_lower:
-                score += 0.2
+                score += 0.15
             elif any(word in title_lower for word in level_lower.split() if len(word) > 3):
-                score += 0.1
+                score += 0.08
 
             if level_lower in summary_lower:
-                score += 0.05
+                score += 0.04
 
             # Preferencia por open access
             if resource.open_access:
-                score += 0.15
+                score += 0.12
 
             # Preferencia por recencia (papers/libros recientes)
             if resource.year:
                 if resource.year >= 2020:
-                    score += 0.1
+                    score += 0.08
                 elif resource.year >= 2015:
                     score += 0.05
                 elif resource.year >= 2010:
-                    score += 0.02
+                    score += 0.03
 
             # Preferencia por citas (si disponible)
             if resource.citation_count and resource.citation_count > 0:
                 # Logarítmico para evitar sesgo excesivo
                 import math
 
-                citation_score = min(0.1, math.log10(resource.citation_count + 1) * 0.05)
+                citation_score = min(0.08, math.log10(resource.citation_count + 1) * 0.04)
                 score += citation_score
 
-            # Preferencia por tipo de recurso según contexto
-            if resource.type == ResourceType.PAPER and "fundamentos" in level_lower:
-                score += 0.05
-            elif resource.type == ResourceType.BOOK and (
-                "intro" in level_lower or "fundamentos" in level_lower
-            ):
-                score += 0.05
-            elif resource.type == ResourceType.VIDEO and (
-                "practica" in level_lower or "aplicacion" in level_lower
-            ):
-                score += 0.05
+            # Diversificación por tipo según contexto
+            if resource.type == ResourceType.BOOK:
+                if (
+                    "fundamentos" in level_lower
+                    or "historia" in level_lower
+                    or "bases" in level_lower
+                    or "intro" in level_lower
+                ):
+                    score += 0.16
+                elif (
+                    "diseño" in level_lower
+                    or "componente" in level_lower
+                    or "arquitectura" in level_lower
+                ):
+                    score += 0.14
+                else:
+                    score += 0.1
+            elif resource.type == ResourceType.VIDEO:
+                if (
+                    "practica" in level_lower
+                    or "proyecto" in level_lower
+                    or "aplicacion" in level_lower
+                    or "tutorial" in level_lower
+                    or "caso" in level_lower
+                ):
+                    score += 0.18
+                else:
+                    score += 0.09
             elif resource.type == ResourceType.DOCUMENTATION:
-                score += 0.03
+                if "fundamentos" in level_lower or "bases" in level_lower:
+                    score += 0.14
+                elif (
+                    "diseño" in level_lower
+                    or "analisis" in level_lower
+                    or "componente" in level_lower
+                ):
+                    score += 0.12
+                else:
+                    score += 0.09
+            elif resource.type == ResourceType.COURSE:
+                if "fundamentos" in level_lower or "intro" in level_lower:
+                    score += 0.16
+                elif (
+                    "practica" in level_lower
+                    or "proyecto" in level_lower
+                    or "integrador" in level_lower
+                ):
+                    score += 0.14
+                else:
+                    score += 0.1
+            elif resource.type == ResourceType.TOOL:
+                if (
+                    "proyecto" in level_lower
+                    or "integrador" in level_lower
+                    or "practica" in level_lower
+                ):
+                    score += 0.1
+                else:
+                    score += 0.06
+            elif resource.type == ResourceType.PAPER:
+                if (
+                    "investig" in level_lower
+                    or "estado del arte" in level_lower
+                    or "research" in level_lower
+                    or "review" in level_lower
+                ):
+                    score += 0.12
+                elif "avanzado" in level_lower:
+                    score += 0.08
+                elif (
+                    "fundamentos" in level_lower or "intro" in level_lower or "bases" in level_lower
+                ):
+                    score -= 0.01
+                else:
+                    score += 0.05
 
             # Bonus por tener autores y metadata completa
             if resource.authors:

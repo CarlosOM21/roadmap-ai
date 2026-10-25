@@ -89,13 +89,19 @@ class MultiSourceRetriever:
         seen_dois: set[str] = set()
         seen_titles: set[str] = set()
 
-        # Ejecutar consultas para todas las fuentes y queries
+        # Ejecutar consultas para todas las fuentes y queries (con límite de concurrencia)
         tasks = []
         task_info = []
 
+        semaphore = asyncio.Semaphore(8)
+
+        async def _search_with_sem(source, query, lim):
+            async with semaphore:
+                return await self._search_source(source, query, lim)
+
         for source in sources:
             for query in queries:
-                tasks.append(self._search_source(source, query, limit))
+                tasks.append(_search_with_sem(source, query, limit))
                 task_info.append((source.name, query))
 
         task_results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -130,7 +136,8 @@ class MultiSourceRetriever:
                         is_duplicate = True
                     elif doi_key and doi_key in seen_dois:
                         is_duplicate = True
-                    elif title_key and title_key in seen_titles and len(title_key) > 10:
+                    elif title_key and title_key in seen_titles and len(title_key) > 20:
+                        # Be more permissive - only dedup very exact long titles
                         is_duplicate = True
 
                     if not is_duplicate:
@@ -166,3 +173,32 @@ class MultiSourceRetriever:
 
 
 __all__ = ["MultiSourceRetriever", "Retriever"]
+
+
+def _is_relevant_to_topic(resource: Resource, topic: str) -> bool:
+    """Filtro básico de relevancia por tema."""
+    topic_lower = topic.lower()
+    title_lower = resource.title.lower()
+    summary_lower = resource.summary.lower()
+    text = f"{title_lower} {summary_lower}"
+
+    # Palabras del tema
+    topic_words = [w for w in topic_lower.split() if len(w) > 3]
+    if not topic_words:
+        return True
+
+    # Contar coincidencias
+    matches = sum(1 for w in topic_words if w in text)
+    if matches >= 1:
+        return True
+
+    # Permitir si es recurso educativo genérico
+    if resource.type.value in ["book", "course", "video", "documentation"]:
+        # Para recursos educativos ser menos estricto
+        return matches >= 0  # permitir si tiene alguna relación o es educativo
+
+    # Para papers ser más estricto
+    if resource.type.value == "paper":
+        return matches >= 1
+
+    return True
