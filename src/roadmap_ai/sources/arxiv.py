@@ -33,8 +33,8 @@ class ArxivSource(BaseSource):
 
     name = "arxiv"
     display_name = "arXiv"
-    min_interval = 3.0
-    max_results = 200
+    min_interval = 2.0
+    max_results = 50
 
     async def _search(self, query: str, limit: int) -> list[Resource]:
         safe_query = query.replace('"', " ").strip()
